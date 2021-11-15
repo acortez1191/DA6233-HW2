@@ -1,0 +1,3 @@
+"0",""
+"0","#SUV"
+"0","hist(SUV$Horsepower, main=""SUV"", xlab=""Horsepower"") #Histogram of Sports"

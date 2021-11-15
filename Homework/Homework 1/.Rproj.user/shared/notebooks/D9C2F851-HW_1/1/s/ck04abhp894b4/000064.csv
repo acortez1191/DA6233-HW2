@@ -1,0 +1,1 @@
+"0","qqnorm(cars[cars$Type==""SUV"", ""Horsepower""]); qqline(cars[cars$Type==""SUV"",""Horsepower""])"

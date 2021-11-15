@@ -1,0 +1,281 @@
+---
+title: "HW_3"
+author: "Ashley Cortez"
+date: "10/17/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/acort/OneDrive/School/Fall 2021/STA 6443/Homework 3")
+heart=read.csv("heart.csv", header=TRUE)
+library(MASS); library(car); library(olsrr); library(DescTools); library(e1071)
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+Exercise 1 
+
+a) Fit a linear regression model for Cholesterol as a function of Weight. If any points are unduly influential, note those points, then remove them and refit the model. Consider Cook’s distance cut off to be 0.015.
+
+```{r}
+
+
+#Correlation
+cor(heart$Cholesterol, heart$Weight, method = "pearson") #0.0695377
+cor(heart$Cholesterol, heart$Weight, method = "spearman") #0.1078544
+
+#Fit Linear Regression
+lm.heart <- lm(Cholesterol~Weight, data=heart)  
+summary(lm.heart) # Cholesterol is predicted to have an increase 0.11, with an increase in Weight. P-value is very small - reject the null -  so at least one beta is nonzero - the model is useful. Has linear relationship. Significant relationship between Cholesterol and weight. Even though out model is effective, 0.4% of Cholesterol can be explained by our linear regression model.
+
+
+# scatter plot - Weight vs. Cholesterol
+with(heart, plot(Weight, Cholesterol)) #Scatter plot
+plot(heart$Weight, heart$Cholesterol, xlab="Weight", ylab="Cholesterol")
+abline(lm.heart, col="red")
+
+# diagnostics plot
+par(mfrow=c(2,2))
+plot(lm.heart, which=c(1:4)) #two of the observations exceed cook's distance cut off of 0.015
+
+#influential points
+cook.q1 = cooks.distance(lm.heart)
+
+plot(cook.q1,col="pink", pch=19, cex=1)
+
+inf.q1 = which(cooks.distance(lm.heart)>0.015)
+heart[inf.q1, ] #observations 23 and 210 exceed cook's distance cut off of 0.015
+
+lm.heart1=lm(Cholesterol~Weight, data=heart[-inf.q1, ]) #model without influential observations
+with(heart, plot(Cholesterol, Weight)) #Scatter plot
+abline(lm.heart, col="red")
+abline(lm.heart1, col="blue")
+
+summary(lm.heart)
+summary(lm.heart1)
+
+par(mfrow=c(2,2))
+plot(lm.heart1, which = c(1:4))
+
+
+```
+
+Model Signifiance(F-Test): The F-statistic has a p-value of 9.778e-05 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that the linear regression model is in fact useful (at lest one beta is not equal to 0).
+
+Individual Term Significance(t-test): The t-statistic has a p-value of 9.78e-05 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that there is a linear relationship between Weight and Cholesterol.
+
+Estimated Regression Line (^y):With the use from the table above the estimated regression line is ^y  = 205.86763 + 0.10867x. In other words, Cholesterol is expected to increase by 0.10867 when there’s a one unit increase in Weight.
+
+R-squared: Even with its linear relationship, only 0.4835% of Cholesterol can be explained by Weight.
+
+We will use the Spearman Correlation since it is robust to outliers in the data. The Spearman Correlation measure of 0.1078544 indicates significantly low correlation between Weight and Cholesterol.
+
+Normality Check (Normal Q-Q Plot): We can see that majority of the points fall along the straight grey line, with the exception of a few points toward the end of the line. Looking at the Standardized Residual plot, we can also see a majority of the points fall above 1.5(Y-axis)
+Therefore, we can conclude that the normality assumption is not reasonable.
+
+Linear Relationship Check (Residual Plot): We can see that there’s a pattern in the plot, therefore Weight and Cholesterol have a linear relationship.
+
+Equal Variance Check (sqrt(Standardized Residuals) Plot): We can see that there’s a pattern in the plot, therefore heteroscedasticity assumption is met.
+
+Based on the above Cook’s Distance plot, the following unduly influential points are noted: Observation 23, 210 and 3094, so we need to refit the model.
+
+b)   Comment on the significance of the parameters, variation explained by the model, and any remaining 
+issues noted in the diagnostics plots. What does this model tell us about the relationship between 
+Cholesterol and Weight? Interpret the relationship specifically. Explain to the medical director whether 
+this is a good model for the prediction of Cholesterol levels.
+
+
+Model Signifiance(F-Test): The F-statistic has a p-value of 8.155e-06 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that the linear regression model is in fact useful (at lest one beta is not equal to 0).
+
+Individual Term Significance(t-test): The t-statistic has a p-value of 8.16e-06 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that there is a linear relationship between Weight and Cholesterol.
+
+Estimated Regression Line(^y):With the use from the table above the estimated regression line is ^y = 203.57605 + 0.12264x. In other words, Cholesterol is expected to increase 0.12264 when there’s a one unit increase in Weight.
+
+R-squared: Even with its linear relationship, only 0.6339% of Cholesterol can be explained by Weight.
+
+With the refitted model the prediction of the model is very low. Therefore, the medical doctor should not use this model as this has a low predictive power.
+
+
+Exercise 2
+
+a)   Fit a linear regression model for cholesterol as a function of diastolic, systolic, and weight. Generate the 
+diagnostics plots and comment on any issues that need to be noted. For Cook’s distances, do not leave 
+any points that have Cook’s distance greater than 0.015.
+
+```{r}
+
+lm.heart2 <- lm(Cholesterol~Weight+Diastolic+Systolic, data=heart)  
+summary(lm.heart2) 
+
+lm.heart3 <- lm(Cholesterol~., data = heart)
+summary(lm.heart3)
+par(mfrow=c(2,2))
+plot(lm.heart2, which=1:4)
+# small p-value - at least one beta is not equal to zero - the model is useful. P-value is pretty large for weight, meaning it does not have the linear relationship with Cholesterol (y) - equal to zero. Diastolic and Systolic have a significant relationship with Cholesterol. 
+
+summary(lm.heart3)$r.squared #3.6%
+summary(lm.heart3)$adj.r.squared #3.5%
+
+# VIF to check multicollinearity
+vif(lm.heart3) #None of the predictors exceed the vif cut off of 10. High number means highly correlated to others.
+
+#influential points
+cook.q2 = cooks.distance(lm.heart3)
+
+inf.q2 = which(cooks.distance(lm.heart3)>0.015)
+heart[inf.q2, ] 
+
+lm.heart4=lm(Cholesterol~., data=heart[-inf.q2, ]) #model without influential observations
+with(heart, plot(Cholesterol, Weight))
+
+pairs(heart, )
+
+
+```
+
+Model Signifiance(F-Test): The F-statistic has a p-value of 2.2e-16 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that the linear regression model is in fact useful (at lest one beta is not equal to 0).
+
+Individual Term Significance(t-test): 
+
+Weight: P-value of 0.4597 > 0.05. Since the pvalue falls above the significance level of 0.05, we do not reject the null and conclude that there is not a significant linear relationship between Weight and Cholesterol.
+
+Diastolic: P-value of 0.0166 < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Diastolic and Cholesterol.
+
+Systolic: P-value of 3.1e-06  < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Systolic and Cholesterol.
+
+Estimated Regression Line(^y):With the use from the table above the estimated regression line is ^y = 157.88394 + 0.24922Diastolic + 0.30073Systolic. In other words, a one unit increase in Diastolic blood pressure is associated with a 0.24922 unit increase in Cholesterol holding Systolic blood pressure constant. Each additional unit of Systolic blood pressure is associated with a 0.30073 unit increase of Cholesterol holding Diastolic blood pressure constant.
+
+R-squared: Even with its linear relationship, only 3.606% of Cholesterol can be explained by Weight.
+
+Normality Check (Normal Q-Q Plot): We can see that majority of the points fall along the straight grey line, with the exception of a few points toward the end of the line. Looking at the Standardized Residual plot, we can also see a majority of the points fall above 1.5(Y-axis)
+Therefore, we can conclude that the normality assumption is not reasonable.
+
+Linear Relationship Check (Residual Plot): We can see that there’s a pattern in the plot, therefore Weight and Cholesterol have a linear relationship.
+
+Equal Variance Check (sqrt(Standardized Residuals) Plot): We can see that there’s a pattern in the plot, therefore heteroscedasticity assumption is met.
+
+Based on the above Cook’s Distance plot, the following unduly influential points are noted: Observation 23, 210 and 2938, so we need to refit the model.
+
+b)   Comment on the significance of the parameters and how much variation in cholesterol is described by the 
+model. Comment on the relationship between cholesterol and statistically significant predictor(s). Check 
+multicollinearity issue among predictors. Explain to the medical director whether this is a good model for 
+the prediction of Cholesterol levels.
+
+```{r}
+
+lm.multicol1 = lm(Cholesterol~Weight+Diastolic+Systolic, data = heart)
+summary(lm.multicol1) #F-test - small p-value means model is useful, at least one beta is not equal to zero. T-test - Weight does not have a significance relationship - beta is equal to zero. 
+
+```
+
+Model Signifiance(F-Test): The F-statistic has a p-value of 2.2e-16 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that the linear regression model is in fact useful (at lest one beta is not equal to 0).
+
+Individual Term Significance(t-test): 
+
+Weight: P-value of 0.1994 > 0.05. Since the pvalue falls above the significance level of 0.05, we do not reject the null and conclude that there is not a significant linear relationship between Weight and Cholesterol.
+
+Diastolic: P-value of 0.0195 < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Diastolic and Cholesterol.
+
+Systolic: P-value of 2.2e-06 < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Systolic and Cholesterol.
+
+Estimated Regression Line(^y):With the use from the table above the estimated regression line is ^y = 156.32618 + 0.24922Diastolic + 0.30073Systolic. In other words, a one unit increase in Diastolic blood pressure is associated with a 0.24922 unit increase in Cholesterol holding Systolic blood pressure constant. Each additional unit of Systolic blood pressure is associated with a 0.30073 unit increase of Cholesterol holding Diastolic blood pressure constant.
+
+R-squared: Even with its linear relationship, only 3.675% of Cholesterol can be explained by Weight.
+
+With the refitted model the prediction of the model is very low. Therefore, the medical doctor should not use this model as this has a low predictive power.
+
+
+
+Exercise 3: 
+
+Now consider stepwise model selection for the Cholesterol model. Before performing the model selection, we 
+remove influential points detected in Exercise 2, which has a cook’s distance larger than 0.015.
+
+a)   Perform stepwise model selection with .05 criteria and address any issues in diagnostics plots.
+
+```{r}
+#Stepwise selection
+
+model.stepwise = ols_step_both_p(lm.heart4, pent = 0.05, prem = 0.05, details = FALSE)
+model.stepwise
+plot(model.stepwise)
+
+lm.step=lm(Cholesterol~Systolic+Diastolic, data = heart)
+summary(lm.step)
+
+
+```
+
+As a result of the step-wise selection process, Systolic and Diastolic will be included in the final model.
+
+Normality Check (Normal Q-Q Plot): We can see that majority of the points fall along the straight grey line, with the exception of a few points toward the end of the line. Looking at the Standardized Residual plot, we can also see a majority of the points fall above 1.5(Y-axis)
+Therefore, we can conclude that the normality assumption is not reasonable.
+
+Linear Relationship Check (Residual Plot): We can see that there’s a pattern in the plot, therefore Weight and Cholesterol have a linear relationship.
+
+Equal Variance Check (sqrt(Standardized Residuals) Plot): We can see that there’s a pattern in the plot, therefore heteroscedasticity assumption is met.
+
+
+b)   Interpret the final model and comment on the variation in Cholesterol explained. Compare the variations 
+explained by the models from Exercise 1 and 2.
+
+Model Signifiance(F-Test): The F-statistic has a p-value of 2.2e-16 < 0.05. Since the pvalue falls below the significance level of 0.05, we can reject the null hypothesis and conclude that the linear regression model is in fact useful (at lest one beta is not equal to 0).
+
+Individual Term Significance(t-test): 
+
+Diastolic: P-value of .95e-06 < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Diastolic and Cholesterol.
+
+Systolic: P-value of 20.00803 < 0.05. Since the pvalue falls below the significance level of 0.05, we reject the null and conclude that there is a significant linear relationship between Systolic and Cholesterol.
+
+Estimated Regression Line(^y):With the use from the table above the estimated regression line is ^y = 159.3317  + 0.24922Diastolic + 0.30073Systolic. In other words, a one unit increase in Diastolic blood pressure is associated with a 0.24922 unit increase in Cholesterol holding Systolic blood pressure constant. Each additional unit of Systolic blood pressure is associated with a 0.30073 unit increase of Cholesterol holding Diastolic blood pressure constant.
+
+R-squared: Even with its linear relationship, only 3.655% of Cholesterol can be explained by Weight.
+
+Exercise 1: Only 0.4835% of the variation in Cholesterol can be explained by the model. Therefore, this is not a good model for the prediction of Cholesterol level (low predictive power).
+
+Exercise 2: Only 3.675% of the variation in Cholesterol can be explained by the model. Therefore, this is not a good model for the prediction of Cholesterol level (low predictive power).
+
+Exercise 3: Only 3.655% of the variation in Cholesterol can be explained by the model. Therefore, this is not a good model for the prediction of Cholesterol level (low predictive power).This is similar to the results of the Exercise 1 and 2 models.
+
+
+
+
+Exercise 4: 
+
+Now consider the best subset selection for the Cholesterol model. Again, we remove influential points detected in 
+Exercise 2, which has cook’s distance larger than 0.015, before performing the model selection.
+
+a)   Find the best model based on adjusted-R square criteria and specify which predictors are selected.
+```{r}
+
+model.best.subset<-ols_step_best_subset(lm.heart4)
+model.best.subset
+
+```
+Best Model: Based off the adjusted R-Square criteria, the best model for Cholesterol is Model 3 since it has the highest adjusted R-Square out of all three models (0.0367)
+Selected Predictors: Weight, Diastolic, and Systolic
+
+
+
+
+b)   Find the best model based on AIC criteria and specify which predictors are selected.
+
+Best Model: Based off the the AIC creteria above, the best model for Cholesterol is Model 2 since it has the smallest AIC value out of all three models (32344.7321)
+Selected Predictors: Diastolic, and Systolic
+
+c)   Compare final models selected in a) and b). Also, compare final models from the best subset approach with the final model from the stepwise selection.
+
+Best Model (Adjusted R-Square): Weight, Diastolic, and Systolic
+Best Model (AIC): Diastolic, and Systolic
+Best Model (Step-Wise Selection): Diastolic, and Systolic
+
+From our final model selection, we can see that both models - AIC and Adjusted R-Square based - have p-values fall below the significance level of 0.05, therefor these models are useful. Also these models contain Diastolic and Systolic predictors whose p-values fall below the significance level of 0.05. We can conclude that there is a significant linear relationship between these 2 predictors, Diastolic and Systolic and Cholesterol.
+
+Therefore, the Best Subset Approach and the Stepwise Selection returned Diastolic and Systolic predictors. The final selected model is Y = 159.3317 + 0.2770(Diastolic) + 0.3022(Systolic).
+

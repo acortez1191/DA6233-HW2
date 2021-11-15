@@ -1,0 +1,3 @@
+"0",""
+"0","#Truck"
+"0","hist(Truck$Horsepower, main=""Truck"", xlab=""Horsepower"") #Histogram of Truck"

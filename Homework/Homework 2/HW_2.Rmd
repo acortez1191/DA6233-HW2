@@ -1,0 +1,256 @@
+---
+title: "HW_2"
+author: "Ashley Cortez"
+date: "9/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DescTools); library(MASS); library(car)
+heart=read.csv("heartbpchol.csv", header = TRUE)
+
+
+```
+
+
+#HW 2
+
+###Exercise 1: Analysis of Variance
+
+```{r}
+#1a Perform a one-way ANOVA for Cholesterol with BP_Status as the categorical predictor. Comment on statistical significance of BP_Status, the amount of variation described by the model, and whether or not the equal variance assumption can be trusted.
+
+
+table(heart$Cholesterol); table(heart$BP_Status) #Unbalanced
+aov.heart= aov(Cholesterol~BP_Status, data = heart)
+LeveneTest(aov.heart) #Large P-vale of 0.8332 - we do not reject the null; keep ANOVA model
+summary(aov.heart) #Very small P-value of 0.00137 - significant effect: there is at least one mean that differs 
+plot(aov.heart)
+#The plots match the normaility assumption, specifically the Normal QQ plot.
+boxplot(Cholesterol~BP_Status, data = heart)
+lm.heart= lm(Cholesterol~BP_Status, data = heart)
+anova(lm.heart)
+summary(lm.heart)$r.squared #2.42% of the variation of Cholesterol can be explained by the BP_Status
+
+
+
+```
+
+
+```{r}
+#1b Comment on any significantly different cholesterol means as determined by the post-hoc test comparing all pairwise differences. Specifically explain what that tells us about differences in cholesterol levels across blood pressure status groups, like which group has the highest or lowest mean values of Cholesterol.
+
+ScheffeTest(aov.heart)
+
+#two groups have a different mean of y 
+#BP_Status: Mean(High)>Mean(optimal); Mean(High)>Mean(normal)
+
+```
+
+
+###Exercise 2: Analysis of Variance
+
+```{r}
+bupa=read.csv("bupa.csv", header = TRUE)
+
+#2a Perform a one-way ANOVA for mcv as a function of drinkgroup. Comment on significance of the drinkgroup, the amount of variation described by the model, and whether or not the equal variance assumption can be trusted.
+
+bupa$drinkgroup= as.factor(bupa$drinkgroup)
+table(bupa$mcv); table(bupa$drinkgroup) #Unbalanced
+aov.mcv= aov(mcv~drinkgroup, data = bupa)
+LeveneTest(aov.mcv) #Large P-vale of 0.8744 - we do not reject the null; keep ANOVA model
+summary(aov.mcv) #Very small P-value of nearly 0 - significant effect: there is at least one mean that differs 
+boxplot(mcv~drinkgroup, data = bupa)
+
+lm.mcv= lm(mcv~drinkgroup, data = bupa)
+anova(lm.mcv)
+summary(lm.mcv)$r.squared #11% of the variation of mcv can be explained by the drink group
+
+plot(aov.mcv)
+
+```
+
+```{r}
+#2b Perform a one-way ANOVA for alkphos as a function of drinkgroup. Comment on statistical significance of the drinkgroup, the amount of variation described by the model, and whether or not the equal variance assumption can be trusted.
+
+table(bupa$alkphos); table(bupa$drinkgroup) #Unbalanced
+aov.alkphos= aov(alkphos~drinkgroup, data = bupa)
+LeveneTest(aov.alkphos) #Large P-vale of 0.5201 - we do not reject the null; keep ANOVA model
+summary(aov.alkphos) #Very small P-value 0.00495 - significant effect: there is at least one mean that differs 
+plot(aov.alkphos)
+boxplot(alkphos~drinkgroup, data = bupa)
+
+lm.alkphos= lm(alkphos~drinkgroup, data = bupa)
+anova(lm.alkphos)
+summary(lm.alkphos)$r.squared #4% of the variation of mcv can be explained by the drink group
+
+plot(aov.alkphos)
+
+```
+
+
+```{r}
+#2c Perform post-hoc tests for models in a) and b). Comment on any similarities or differences you observe from their results.
+
+ScheffeTest(aov.mcv); ScheffeTest(aov.alkphos)
+
+```
+
+
+###Exercise 3
+
+
+```{r}
+psych=read.csv("psych.csv")
+
+#3a Fit a two-way ANOVA model including sex (F, M) and rank (Assistant, Associate) the interaction term. What do the Type 1 and Type 3 sums of squares tell us about significance of effects? Is the interaction between sex and rank significant? Also comment on the variation explained by the model.
+
+#Type 1 Test
+table(psych$sex); table(psych$rank) #Unbalanced
+aov.psych <- aov(salary~sex*rank, data = psych)
+summary(aov.psych) #Small p-value - sex and rank  have a small p-value, so they have a significant effect on salary
+
+#interaction p-value is 0.795101, so there is no significant interaction effect
+
+#Type 3 Test
+aov.psych1 =Anova(aov.psych, type=3)
+aov.psych1
+Anova(aov.psych, type=3)
+
+LeveneTest(aov.psych) #P-value is large at 0.7241 - data has equal variance
+ plot(aov.psych)
+
+lm.psych= lm(salary~sex*rank, data = psych)
+summary(lm.psych)$r.squared #66.48% of the variation of salary can be explained by sex and rank
+
+TukeyHSD(aov.psych)
+
+```
+
+
+```{r}
+
+#3b Refit the model without the interaction term. Comment on the significance of effects and variation explained. Report and interpret the Type 1 and Type 3 tests of the main effects. Are the main effects of rank and sex significant?
+
+summary(aov(salary~sex+rank, data = psych))
+
+#Type 1
+aov.psych2 <- aov(salary~sex+rank, data=psych)
+aov.psych3 <- aov(salary~rank+sex, data=psych)
+summary(aov.psych2) #both sex and rank have a small p-value - there exists significant sex and rank effect
+#sex SS(sex)
+#rank SS(rank|sex)
+
+summary(aov.psych3) #both sex and rank have a small p-value - there exists significant sex and rank effect
+#rank ss(rank)
+#sex ss(sex|rank)
+
+TukeyHSD(aov.psych2)
+LeveneTest(aov(salary~sex+rank, data=psych)) #p-value 0.7241 - data has equal variance
+
+#Type 1 - the order of the term matters 
+
+#Type 3
+aov.psych4= Anova(aov.psych2, type=3)
+aov.psych4 #p-value is small - there exists significant sex and rank effect
+
+#sex SS(sex|rank)
+#rank SS(rank|sex)
+
+#Type 3 test - order does not matter 
+
+
+lm.psych= lm(salary~sex+rank, data=psych)
+summary(lm.psych)$r.squared #66.35% of the variation of highway mpg can be explained by vehicle type and cylinders
+
+
+
+```
+
+
+
+```{r}
+#(c) Obtain model diagnostics to validate your Normality assumptions.
+
+plot(aov.psych); plot(aov.psych2); plot(aov.psych3)
+
+
+
+```
+
+```{r}
+#3d Choose a final model based on your results from parts (a) and (b). Comment on any significant group differences through the post-hoc test. State the differences in salary across different main effect groups and interaction (if included) between them.
+
+aov.psych
+ScheffeTest(aov.psych)
+```
+
+
+###Exercise 4
+
+```{r}
+cars = read.csv("cars_new.csv")
+
+#4a Start with a three-way main effects ANOVA and choose the best main effects ANOVA model for mpg_highway as a function of cylinders, origin, and type for the cars in this set. Comment on which terms should be kept in a model for mpg_highway and why based on Type 3 SS. For the model with just predictors you decide to keep, comment on the significant effects in the model and comment on how much variation in highway fuel efficiency the model describes.
+
+cars$cylinders=as.factor(cars$cylinders)
+summary(aov(mpg_highway~cylinders+origin+type, data = cars))
+
+# Cylinders and type of car have a significant effect on highway mpg, but origin does not
+
+aov.cars <- aov(mpg_highway~cylinders+origin+type, data = cars)
+aov.cars2= Anova(aov.cars, type=3)
+aov.cars2 #p-value is nearly 0 for cylinders and origin, so there exists a significant effect on highway mpg, but origin has a large p-value of 0.77948, meaning it does not have an effect on highway mpg and should not be kept
+
+aov.cars3 <- aov(mpg_highway~cylinders+type, data = cars)
+aov.cars4 =Anova(aov.cars3, data = cars)
+aov.cars4
+
+lm.cars= lm(mpg_highway~cylinders+type, data = cars)
+summary(lm.cars)$r.squared #46% of the variation of highway mpg can be explained by vehicle type and cylinders
+
+LeveneTest(aov(mpg_highway~cylinders+type, data = cars))
+
+
+```
+
+
+```{r}
+
+#4b Starting with main effects chosen in part (a), find your best ANOVA model by adding in any additional interaction terms that will significantly improve the model. For your final model, comment on the significant effects and variation explained by the model.
+
+#Type 1 Test
+table(cars$cylinders); table(cars$type) #Unbalanced
+aov.cars5 <- aov(mpg_highway~cylinders*type, data = cars)
+summary(aov.cars5) #Small p-value - cylinders and type have a small p-value, so they have a significant effect on mpg_highway
+
+#interaction p-value is also small, so there is a significant interaction effect
+
+aov.ozkid3= aov(days ~ origin +  grade +origin*grade , data = ozkid)
+Anova(aov.ozkid3, type=3)
+summary(aov.ozkid3)
+
+#Type 3 Test
+aov.cars6 =Anova(aov.cars5, type=3)
+aov.cars6
+
+
+lm.cars= lm(mpg_highway~cylinders*type, data = cars)
+summary(lm.cars)$r.squared #48% of the variation of salary can be explained by sex and rank
+
+LeveneTest(mpg_highway~cylinders*type, data = cars)
+plot(aov.cars6)
+
+```
+
+
+```{r}
+
+#4c Comment on any significant group differences through the post-hoc test. What does this tell us about fuel efficiency differences across cylinders, origin, or type groups? See Hint in Exercise 3.
+
+TukeyHSD(aov.cars5)
+
+
+```
+

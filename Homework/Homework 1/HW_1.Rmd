@@ -1,0 +1,266 @@
+---
+title: "HW 1"
+author: "Ashley Cortez and Jacob Kendall"
+date: "9/5/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# HW1
+setwd() # set your own path
+
+
+### Exercise 1: Descriptive Statistics 
+
+```{r}
+#1 (a)
+
+cars=read.csv("Cars.csv", header = TRUE)  # read data set 
+MPG_Combo <- 0.6*cars$MPG_City+0.4*cars$MPG_Highway  # combined mpg variable 
+cars=data.frame(cars, MPG_Combo)   # data frame with MPG_Combo 
+boxplot(MPG_Combo, main = "MPG Variable", ylab = "MPG") #Boxplot of MPG_Combo
+points(mean(MPG_Combo, na.rm = TRUE)) #Mean point on boxplot
+summary(MPG_Combo)
+
+#The box plot indicates that the median miles per gallon among vehicles is 22 mpg. The mean of 22.54 is slightly higher than the median of 22.00. Therefore, the data is skewed to the right, which may indicate several outliers with miles per gallon significantly above and below the median, and the data is not normally distributed.  
+```
+
+
+```{r}
+# 1 (b) Obtain box plots for MPG_Combo by Type and comment on any differences you notice between the different vehicle types combined fuel efficiency. 
+
+plot(factor(cars$Type), cars$MPG_Combo, main ="Fuel Efficiency", ylab = "MPG", xlab = "Vehicle Type") #Box plots for MPG_Combo by Type
+
+
+SUV = subset(cars, Type == "SUV")  #Subset SUV as dataframe
+summary(SUV$MPG_Combo) #Summarize SUV 
+
+Sports = subset(cars, Type == "Sports") #Subset Sports as dataframe
+summary(Sports$MPG_Combo) #Summarize Sports
+
+
+Truck = subset(cars, Type == "Truck") #Subset Truck as dataframe
+summary(Truck$MPG_Combo) #Summarize Sports
+
+
+Sedan =subset(cars, Type == "Sedan")  #Subset Sedan as dataframe
+summary(Sedan$MPG_Combo) #Summarize Sedan
+
+Wagon = subset(cars, Type == "Wagon")  #Subset Wagon as dataframe
+summary(Wagon$MPG_Combo) #Summarize Wagon
+
+####Combine Boxplots####
+par(mfrow = c(1,3))
+boxplot(SUV$MPG_Combo, Sports$MPG_Combo, Truck$MPG_Combo, main= "Fuel Efficiancy", ylab = "MPG", xlab = "Vehvicle Type", horizontal = TRUE)
+
+
+
+```
+
+
+
+```{r}
+# 1 (c) Obtain basic descriptive statistics for Horsepower for all vehicles. Comment on any general features and statistics of the data. Use visual and quantitative methods to comment on whether an assumption of Normality would be reasonable for Horsepower variable. 
+
+library(moments)
+
+summary(cars$Horsepower, na.rm = TRUE) #Descriptive Stats Snapshot
+#####Qualitative#####
+#Min 100, 1st Qtr 165, Median 210, Mean 216.8, 3rd Qtr 255, Max 500
+#Note that the mean > median, slightly right skewed
+var(cars$Horsepower, na.rm = TRUE) #Variance
+skewness(cars$Horsepower, na.rm = TRUE) #Skewness
+range(cars$Horsepower, na.rm = TRUE)  #Range
+
+hist(cars$Horsepower, main = "Horsepower", xlab = "Horsepower") #Histogram of Horsepower
+boxplot(cars$Horsepower, main = "Disribution of Horsepower", ylab = "Horsepower") #Boxplot of Horsepowr
+points(mean(cars$Horsepower, na.rm = TRUE)) #Mean point on boxplot
+qqnorm(cars$Horsepower, main = "Horsepower", ylab = "Hp"); qqline(cars$Horsepower, col = 2) #Normality Plot
+
+#####Quantitative#####
+shapiro.test(cars$Horsepower)
+
+```
+
+
+```{r}
+#1d
+
+library(moments)
+
+#i) Sports
+
+hist(Sports$Horsepower, main = "Sports", xlab = "Horsepower") #Histogram of Sports
+boxplot(Sports$Horsepower, main = "Sports", ylab = "Horsepower") # Boxplot for Sports
+points(mean(Sports$Horsepower, na.rm = TRUE)) #Mean point on boxplot
+qqnorm(Sports$Horsepower, main = "Sports", ylab = "Hp"); qqline(Sports$Horsepower, col = 2) #Normality Plot
+
+#Normality Information
+var(Sports$Horsepower, na.rm = TRUE) #Variance
+skewness(Sports$Horsepower, na.rm = TRUE) #Skewness
+range(Sports$Horsepower, na.rm = TRUE)  #Range
+#Qunatitative Test
+shapiro.test(Sports$Horsepower)
+
+#ii) SUV
+
+hist(SUV$Horsepower, main = "SUV", xlab = "Horsepower") #Histogram of SUV
+boxplot(SUV$Horsepower, main = "SUV", ylab = "Horsepower") # Boxplot for SUV
+points(mean(SUV$Horsepower, na.rm = TRUE)) #Mean point on boxplot
+qqnorm(SUV$Horsepower, main = "SUV", ylab = "Hp"); qqline(SUV$Horsepower, col = 2) #Normality Plot
+
+#Normality Information
+var(SUV$Horsepower, na.rm = TRUE) #Variance
+skewness(SUV$Horsepower, na.rm = TRUE) #Skewness
+range(SUV$Horsepower, na.rm = TRUE)  #Range
+#Qunatitative Test
+shapiro.test(SUV$Horsepower)
+
+#iii) Truck
+
+hist(Truck$Horsepower, main = "Truck", xlab = "Horsepower") #Histogram of Truck
+boxplot(Truck$Horsepower, main = "Truck", ylab = "Horsepower") # Boxplot for Truck
+points(mean(Truck$Horsepower, na.rm = TRUE)) 
+var(Truck$Horsepower, na.rm = TRUE) #Variance
+skewness(Truck$Horsepower, na.rm = TRUE) #Skewness
+range(Truck$Horsepower, na.rm = TRUE)  #Range
+qqnorm(Truck$Horsepower, main = "Truck", ylab = "Hp"); qqline(Truck$Horsepower, col = 2) #Normality Plot
+
+#Qunatitative Test
+shapiro.test(Truck$Horsepower)
+
+####Combine Boxplots####
+par(mfrow = c(1,3)) #Combine boxplots
+boxplot(SUV$Horsepower, Sports$Horsepower, Truck$Horsepower, main= "Horsepower", ylab = "HP", xlab = "Vehicle Type", horizontal = FALSE)#Boxplots for HP and Vehicle Type
+
+
+
+```
+
+
+### Exercise 2: Hypothesis Testing 
+###Perform a hypothesis test of whether SUV has different horsepower than Truck, and state your conclusions 
+
+```{r}
+#2(a) Which test should we perform, and why? Justify your answer based on findings on Exercise 1 (d). 
+
+#Normality of SUV
+HPSUV <- cars[cars$Type =="SUV", "Horsepower"]
+
+hist(SUV$Horsepower, main = "SUV", xlab = "Horsepower") #Histogram of SUV
+boxplot(SUV$Horsepower, main = "Horsepower by Type", ylab = "Horsepower", xlab = "SUV") # Boxplot for SUV
+points(mean(SUV$Horsepower, na.rm = TRUE)) #Mean point on boxplot
+qqnorm(SUV$Horsepower, main = "SUV", ylab = "Hp"); qqline(SUV$Horsepower, col = 2) #Normality Plot
+#Qunatitative Test
+shapiro.test(SUV$Horsepower) #PValue is less than 5%, Reject Null We do not have evidence that Data is not normally distributed
+
+#Normality of Truck
+HPTruck <- cars[cars$Type =="Truck", "Horsepower"]
+
+hist(Truck$Horsepower, main = "Truck", xlab = "Horsepower") #Histogram of Truck
+boxplot(Truck$Horsepower, main = "Horsepower by Type", ylab = "Horsepower", xlab = "Truck") # Boxplot for Truck
+points(mean(Truck$Horsepower, na.rm = TRUE)) 
+var(Truck$Horsepower, na.rm = TRUE) #Variance
+skewness(Truck$Horsepower, na.rm = TRUE) #Skewness
+range(Truck$Horsepower, na.rm = TRUE)  #Range
+qqnorm(Truck$Horsepower, main = "Truck", ylab = "Hp"); qqline(Truck$Horsepower, col = 2) #Normality Plot
+#Qunatitative Test
+shapiro.test(Truck$Horsepower) #PValue is less than 5%, Reject Null We do not have evidence that Data is not normally distributed
+
+
+####Combine Boxplots####
+boxplot(SUV$Horsepower, Truck$Horsepower, main= "Horsepower by Type", ylab = "HP", xlab = "Vehicle Type", horizontal = FALSE) #Boxplots for HP and Vehicle Type
+
+#Data for SUV AND Truck is not normaly distributed, non-parametric test
+
+#Run Wilcoxon Rank-Sum Test
+
+```
+
+```{r}
+#2 (b) Specify null and alternative hypotheses. 
+
+#Ho: Median of Horsepower for SUVs is equal to the median of Horsepower for Trucks
+#Ho: MSUV = MTruck
+#Ha: Median of Horsepower for SUVs is not equal to the median of Horsepower for Trucks
+#Ha: MSUV != MTruck 
+
+
+```
+
+
+```{r}
+#2 (c) State the conclusion based on the test result. 
+
+wilcox.test(HPSUV, HPTruck, exact = FALSE)
+#PValue is greater than 5%, we do not have enough evidence to reject the null.
+#We can conclude that median horsepower for SUVs is equal to the median horsepower for Trucks
+
+```
+
+
+###Exercise 3: Hypothesis Testing
+
+###Perform a hypothesis test -whether Wind in July has a different speed (mph) than Wind in August. 
+
+```{r}
+#3 (a) Which test should we perform, and why? See QQ-plot and perform Shapiro-Wilk test for normality check. 
+
+boxplot(Wind ~ Month, data = airquality, main = "Wind Speed by Month") #Boxplot of Wind
+points(mean(airquality$Wind, na.rm = TRUE))
+
+#Wind Speed for July
+month7.wind <- airquality[airquality$Month ==7, "Wind"]
+var(month7.wind, na.rm = TRUE) #Variance
+skewness(month7.wind, na.rm = TRUE) #Skewness
+range(month7.wind, na.rm = TRUE)  #Range
+qqnorm(airquality$Wind[airquality$Month == "7"], main = "Wind Speed of July"); qqline(airquality$Wind[airquality$Month =="7"], col = 2) #Normality Plot
+#Quantitative Test
+shapiro.test(airquality[airquality$Month ==7, "Wind"]) #PValue is greater than 5%, We do not have evidence to reject the Null so our data is normally distributed
+
+#Wind Speed for August
+month8.wind <- airquality[airquality$Month ==8, "Wind"]
+var(month8.wind, na.rm = TRUE) #Variance
+skewness(month8.wind, na.rm = TRUE) #Skewness
+range(month8.wind, na.rm = TRUE)  #Range
+qqnorm(airquality$Wind[airquality$Month == "8"], main = "Wind Speed of August"); qqline(airquality$Wind[airquality$Month =="7"], col = 2) #Normality Plot
+#Quantitative Test
+shapiro.test(airquality[airquality$Month ==8, "Wind"]) #PValue is greater than 5%, We do not have evidence to reject the Null so our data is  normally distributed
+
+
+#Variance Test by Month
+var.test(month7.wind, month8.wind, data = airquality)
+#PValue is .7418 which is greater than 5% so we do not have enough evidence to reject the Null.  The two populations have equal variance.
+
+
+
+```
+
+
+```{r}
+#3 (b) Specify null and alternative hypotheses 
+
+#Ho: Mean speed of wind in July is equal to the mean speed of wind in August
+#Ho: M7 = M8
+#Ha: Mean speed of wind in July is not equal to the mean speed of wind in August
+#Ha: M7 != M8 
+
+```
+
+
+```{r}
+#3 (c) State the conclusion based on the test result. 
+
+
+t.test(month7.wind, month8.wind, alternative = "two.sided", var.equal = TRUE) 
+
+#PValue is .8527 which is greater than 5%.  We do not have enough evidence to reject the NUll and may conclude that there is NOT a significant difference in wind speed between July and August
+
+
+```
+

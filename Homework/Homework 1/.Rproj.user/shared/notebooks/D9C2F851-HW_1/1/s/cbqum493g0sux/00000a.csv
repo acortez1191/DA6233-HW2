@@ -1,0 +1,3 @@
+"0","# 1 (b) Obtain box plots for MPG_Combo by Type and comment on any differences you notice between the different vehicle types combined fuel efficiency. "
+"0",""
+"0","plot(factor(cars$Type), cars$MPG_Combo, main =""Fuel Efficiency"", ylab = ""MPG"", xlab = ""Vehicle Type"")"

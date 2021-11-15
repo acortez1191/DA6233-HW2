@@ -1,0 +1,1 @@
+"0","points(mean(Truck$Horsepower, na.rm=TRUE)) #Mean point on boxplot"
